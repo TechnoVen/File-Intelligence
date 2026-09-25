@@ -16,8 +16,9 @@ Filesystem roots are explicit.
 Automated filesystem tests use synthetic temporary fixtures only.
 
 These must be enforced in Rust when the corresponding capabilities are
-implemented; they are not optional UI preferences. The current starter
-application does not implement these capabilities.
+implemented; they are not optional UI preferences. Phase 0B implements internal
+analysis-root/path primitives only. User-file execution safeguards remain planned;
+there is no production filesystem command or mutation authority.
 
 ## Phase gates
 
@@ -37,6 +38,22 @@ Validate containment in Rust, accounting for links, path aliases,
 platform path semantics, and files replaced during operations.
 Do not traverse junctions or equivalent links implicitly.
 Unsupported or ambiguous cases fail closed.
+
+Phase 0B accepts existing-path observations only. Relative paths reject all parent
+components and absolute/prefixed forms before filesystem probing. Empty relative
+paths are rejected; root observation requires an explicit selector. Missing paths
+return errors and must not create anything. Child symlinks are rejected even when
+they target a location inside the root. Windows reparse points are rejected.
+
+Root candidates resolve their explicitly supplied location; future user approval
+must bind to that resolved location. Root configuration alone grants no permission.
+An active backend registry entry is required for each analysis observation.
+
+Canonicalization and component containment do not provide durable authorization.
+Concurrent replacement, same-path directory identity changes, and mount crossings
+are not solved by the Phase 0B primitives. Before Phase 1 performs real traversal,
+it must establish operation-time containment, link-race handling, root identity,
+and mount-crossing policy. Do not use an observation as an execution capability.
 
 Dry-run does not mutate source files, destination files, or taxonomy
 directories. Any application-state writes are explicit and must not
@@ -97,6 +114,12 @@ Validate fixture ownership and containment before operations or cleanup.
 Never follow a fixture link into a real user location.
 Use fake platform adapters for ordinary Trash tests; platform integration
 tests must also use isolated synthetic storage.
+
+Phase 0B fixtures use owned temporary directories under `src-tauri/target`.
+The parent must be repository-local and must not be a symlink or reparse point;
+environment variables cannot redirect fixture storage. Escape-test targets remain
+inside synthetic test-owned storage. Windows link tests fail explicitly if link
+privileges are unavailable; an unrun or skipped platform test is not a passing test.
 
 Safety validation includes stale files, link escapes, collisions,
 permissions, interrupted execution, journal failures, partial batches,

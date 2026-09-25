@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "foundation-status"
+description = "Read implemented foundation capabilities; no filesystem access."
+commands.allow = ["get_foundation_status"]

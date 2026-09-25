@@ -6,8 +6,78 @@ Production uses Rust, Tauri 2, Svelte/SvelteKit, and TypeScript.
 SQLite is planned. Local inference is planned behind a replaceable
 abstraction.
 
-The current implementation is the starter UI and greet command.
-The boundaries below describe the intended architecture.
+Phase 0B implements foundation status, internal Rust root/path observations,
+analysis grants, structured errors, job primitives, and provisional lifecycle
+vocabulary. It does not implement scanning, persistence, proposal generation,
+file mutation, recovery execution, or AI.
+The domain responsibilities below remain planned unless described as implemented.
+
+## Implemented foundation modules
+
+- `commands`: only `get_foundation_status`; no filesystem access.
+- `contracts`: wire DTOs, opaque identifiers, and provisional lifecycle enums.
+- `error`: stable error codes with path-free public messages.
+- `roots`: optional Master Root configuration and process-local analysis grants.
+- `paths`: lexical validation and point-in-time existing-path observations.
+- `jobs`: progress records and cooperative cancellation; no workers or scheduler.
+- `test_support`: test-only synthetic temporary fixtures under the repository's
+  `src-tauri/target`, with no environment-selected temporary parent.
+
+The application starts no root registry or filesystem job. Root preparation,
+authorization, revocation, and observation are exercised only by fixture tests
+in this phase. Master Root configuration does not grant analysis permission.
+Root IDs cannot be reused within a registry after revocation; runtime and durable
+ID allocation across sessions remain future work.
+
+Proposal, Journal, Transaction, and Recovery enums are explicitly provisional
+vocabulary, not transition engines, storage schemas, or execution APIs.
+An `IntentDurable` enum value is not evidence of a durable journal write.
+
+## Foundation wire contract
+
+Rust owns the wire contract. JSON fields use camelCase, enum values use snake_case,
+and IDs are opaque strings. Progress sequence/count values serialize as decimal
+strings; an unknown total is null. Cancellation requests are idempotent and shared,
+but acknowledgement is a separate job state. Phase 1 must implement bounded worker
+checkpoints, terminal-status retention, and rejection of late progress updates.
+
+The sole production application command reports contract version 1 and foundation
+status, with root selection, scanning, proposal generation, execution, and AI all
+unavailable. No root/path helper is exposed through IPC. The application command
+manifest and main-window permission allow only `get_foundation_status`; opener
+registration and permission are absent. Existing opener dependencies remain unused.
+
+The frontend wrapper accepts unknown IPC data and validates the status/error shape.
+It distinguishes application errors, transport failures, and contract mismatches.
+Manual TypeScript definitions are checked against shared synthetic JSON fixtures
+and Rust serialization tests. This is not generated structural equivalence.
+Backend-only lifecycle vocabulary is not duplicated in frontend types.
+
+Production CSP permits local assets and Tauri IPC, with no remote content or eval.
+The development CSP additionally permits loopback Vite HMR. Non-loopback development
+hosts require a deliberate future policy change; they are not implicitly allowed.
+Desktop runtime CSP/IPC behavior still needs interactive platform validation.
+
+## Observation is not operation-time authorization
+
+Relative requests reject absolute paths, prefixes, parent traversal, and implicit
+empty-root selection. Root selection is explicit; existing root candidates resolve
+ancestor aliases and expose the resolved location for future confirmation.
+Selected roots that are links are rejected. Existing children are inspected for
+links component by component, canonicalized, and checked using path components.
+Missing paths are errors; no destination or parent is created.
+
+Windows input policy rejects UNC/device roots, reparse points, stream syntax, and
+ambiguous reserved names. Unix native path bytes are preserved without lossy
+conversion, case folding, or Unicode normalization for authorization.
+Lexical non-Unicode preservation is tested on Unix. The local macOS filesystem
+rejects invalid UTF-8 filenames; the disk-level non-Unicode case targets Linux
+and is not claimed as a macOS filesystem pass.
+
+These checks are point-in-time observations. They cannot detect every replacement
+with another ordinary directory at the same path and do not close TOCTOU races.
+They do not inspect mount boundaries. Phase 1 must establish operation-time
+containment and mount policy before real directory traversal or file opening.
 
 ## Ownership and dependency direction
 

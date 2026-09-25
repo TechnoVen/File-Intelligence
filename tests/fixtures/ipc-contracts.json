@@ -1,0 +1,17 @@
+{
+  "status": {
+    "contractVersion": 1,
+    "phase": "foundation",
+    "capabilities": {
+      "rootSelection": false,
+      "scanning": false,
+      "proposalGeneration": false,
+      "execution": false,
+      "localAi": false
+    }
+  },
+  "error": {
+    "code": "permission_denied",
+    "message": "Access was denied."
+  }
+}

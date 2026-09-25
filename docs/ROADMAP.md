@@ -3,7 +3,8 @@
 ## Status
 
 Phase 0 — Foundation.
-The production application currently contains only its starter scaffold.
+The production application exposes foundation status only. Phase 0B root/path
+primitives and lifecycle vocabulary do not enable scanning or file mutation.
 Reference screenshots, mock records, and historical milestones are not
 evidence of completed production phases.
 
@@ -19,11 +20,33 @@ Establish fixture isolation, explicit root policy, IPC/error conventions,
 reference-source separation, and initial automated checks.
 Define proposal, journal, and recovery lifecycle contracts.
 
+Implemented scope: ordinary Rust modules, structured errors, internal analysis
+grants, conservative existing-path observations, synthetic fixtures, progress and
+cancellation primitives, provisional lifecycle enums, and typed foundation IPC.
+No transition engine, persistence abstraction, worker, or mutation API is included.
+
+Validation commands: cargo fmt --check, cargo check, cargo clippy --all-targets,
+cargo test, pnpm check, node tests/contracts.typecheck.ts, and pnpm build.
+The conventional CI workflow runs checks on macOS, Linux, and Windows. Adding the
+workflow is not evidence that those remote platform runs passed. Platform-specific
+safety behavior and desktop CSP/IPC require validation on each claimed platform.
+
+Local macOS validation: formatting, cargo check, Clippy with warnings denied,
+20 Rust tests (none ignored), frontend type checking, executable IPC contract
+checks, and the frontend production build passed. Linux/Windows CI has not run
+in this implementation session. Non-Unicode disk-name preservation is a Linux
+test; macOS validates lexical preservation only because its filesystem rejected
+the synthetic invalid UTF-8 name.
+
 ### 1 — Read-only scanner
 
 Implement explicit-root inventory, link policy, metadata observations,
 progress, cancellation, and partial-error reporting.
 Gate: no user-file mutations; synthetic-fixture validation passes.
+Before real traversal, resolve operation-time containment and TOCTOU/link races,
+root identity and mount-crossing policy, explicit root confirmation, and runtime
+job/root identifier allocation. Phase 0B canonicalization is not sufficient
+authorization for opening or enumerating a directory.
 
 ### 2 — SQLite index
 
